@@ -112,15 +112,8 @@ Example Response:
 ---
 
 ## 👌 Contributors
-- **Your Name** - Developer  
-- **Other Team Members**  
+- **Your Name** - Piyush Pethe
 
 ---
 
-## 📚 License
-This project is licensed under the MIT License.
-
----
-
-Happy Coding! 🚀
 
