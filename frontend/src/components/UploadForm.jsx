@@ -1,33 +1,54 @@
 import { useState } from "react";
 
-const UploadForm = ({ onResult }) => {
-  const [features, setFeatures] = useState("");
+function UploadForm({ onResult }) {
+  const [input, setInput] = useState("");
 
-  const handleChange = (e) => {
-    setFeatures(e.target.value);
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const featureArray = features.split(",").map(Number);
+    try {
+      const featureArray = input.split(",").map(Number); // Convert input to numbers
+      const requestBody = [{ features: featureArray }]; // Format as list of objects
 
-    const response = await fetch("http://127.0.0.1:5000/predict", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ features: featureArray }),
-    });
+      const response = await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody), // Send as list
+      });
 
-    const data = await response.json();
-    onResult(data.cluster);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Response:", data);
+
+      if (Array.isArray(data) && data.length > 0) {
+        onResult(data[0].cluster); // Extract first result’s cluster
+      } else {
+        onResult("Error: Invalid response");
+      }
+    } catch (error) {
+      console.error("Error fetching prediction:", error);
+      onResult(`Error: ${error.message}`);
+    }
   };
 
   return (
-    <div>
-      <h2>Enter Customer Data:</h2>
-      <input type="text" value={features} onChange={handleChange} placeholder="Enter features, comma-separated" />
-      <button onClick={handleSubmit}>Predict</button>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <label>Enter Customer Data:</label>
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="135, 5, 98095"
+        required
+      />
+      <button type="submit">Predict</button>
+    </form>
   );
-};
+}
 
 export default UploadForm;
